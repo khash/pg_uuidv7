@@ -16,7 +16,9 @@ RUN cp sql/pg_uuidv7--1.6.sql . && TARGETS=$(find * -name pg_uuidv7.so) \
   && tar -czvf pg_uuidv7.tar.gz $TARGETS pg_uuidv7--1.6.sql pg_uuidv7.control \
   && sha256sum pg_uuidv7.tar.gz $TARGETS pg_uuidv7--1.6.sql pg_uuidv7.control > SHA256SUMS
 
-FROM postgres:${PG_MAJOR} AS env-deploy
+FROM ghcr.io/cloudnative-pg/postgresql:${PG_MAJOR} AS env-deploy
+
+USER root
 
 # copy tarball and checksums
 COPY --from=0 /srv/pg_uuidv7.tar.gz /srv/SHA256SUMS /srv/
@@ -25,3 +27,6 @@ COPY --from=0 /srv/pg_uuidv7.tar.gz /srv/SHA256SUMS /srv/
 COPY --from=0 /srv/${PG_MAJOR}/pg_uuidv7.so /usr/lib/postgresql/${PG_MAJOR}/lib
 COPY --from=0 /srv/pg_uuidv7.control /usr/share/postgresql/${PG_MAJOR}/extension
 COPY --from=0 /srv/pg_uuidv7--1.6.sql /usr/share/postgresql/${PG_MAJOR}/extension
+
+RUN usermod -u 26 postgres
+USER 26
