@@ -108,6 +108,35 @@ The prebuilt image [is similar](https://github.com/fboulnois/pg_uuidv7/pull/29#i
 to a vanilla Postgres instance so the extension needs to be enabled manually or
 with an initialization script with `CREATE EXTENSION pg_uuidv7;`.
 
+### pgvector Support (PostgreSQL 17 only)
+
+The Docker images for PostgreSQL 17 include both `pg_uuidv7` and `pgvector` extensions,
+allowing you to use UUIDv7 primary keys with vector similarity search:
+
+```sql
+CREATE EXTENSION vector;
+CREATE EXTENSION pg_uuidv7;
+
+CREATE TABLE documents (
+    id uuid PRIMARY KEY DEFAULT uuid_generate_v7(),
+    content text,
+    embedding vector(768)
+);
+
+-- Insert documents with embeddings
+INSERT INTO documents (content, embedding) 
+VALUES ('Example document', '[0.1,0.2,0.3,...]'::vector);
+
+-- Find similar documents using vector similarity search
+SELECT id, content 
+FROM documents 
+ORDER BY embedding <-> '[0.1,0.2,0.3,...]'::vector 
+LIMIT 10;
+```
+
+Note: pgvector is only included in PostgreSQL 17 images. For other PostgreSQL versions,
+you can install pgvector separately if needed.
+
 ## Test
 
 A separate [`Dockerfile`](test/Dockerfile) is available to build the extension
