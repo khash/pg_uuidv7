@@ -18,6 +18,7 @@ RUN cp sql/pg_uuidv7--1.6.sql . && TARGETS=$(find * -name pg_uuidv7.so) \
 
 FROM ghcr.io/cloudnative-pg/postgresql:${PG_MAJOR} AS env-deploy
 
+ARG PG_MAJOR=17
 USER root
 
 # install build dependencies for pgvector (only needed for PG 17)
